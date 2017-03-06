@@ -14,6 +14,7 @@ function adminer_object() {
         new AdminerJsonColumn,
         new AdminerTablesFilter,
         new AdminerRestoreMenuScroll,
+        new AdminerTheme,
     );
 
     /* It is possible to combine customization and plugins:
