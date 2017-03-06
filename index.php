@@ -13,6 +13,7 @@ function adminer_object() {
         new AdminerDumpAlter,
         new AdminerJsonColumn,
         new AdminerTablesFilter,
+        new AdminerRestoreMenuScroll,
     );
 
     /* It is possible to combine customization and plugins:
