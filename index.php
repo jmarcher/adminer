@@ -1,21 +1,23 @@
 <?php
-function adminer_object() {
+
+function adminer_object()
+{
     // required to run any plugin
-    include_once "./plugins/plugin.php";
+    include_once './plugins/plugin.php';
 
     // autoloader
-    foreach (glob("plugins/*.php") as $filename) {
+    foreach (glob('plugins/*.php') as $filename) {
         include_once "./$filename";
     }
 
-    $plugins = array(
+    $plugins = [
         // specify enabled plugins here
-        new AdminerDumpAlter,
-        new AdminerJsonColumn,
-        new AdminerTablesFilter,
-        new AdminerRestoreMenuScroll,
-        new AdminerTheme,
-    );
+        new AdminerDumpAlter(),
+        new AdminerJsonColumn(),
+        new AdminerTablesFilter(),
+        new AdminerRestoreMenuScroll(),
+        new AdminerTheme(),
+    ];
 
     /* It is possible to combine customization and plugins:
     class AdminerCustomization extends AdminerPlugin {
@@ -27,5 +29,4 @@ function adminer_object() {
 }
 
 // include original Adminer or Adminer Editor
-include "./adminer.php";
-?>
+include './adminer.php';
