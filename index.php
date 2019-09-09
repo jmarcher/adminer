@@ -1,5 +1,6 @@
 <?php
-function adminer_object() {
+function adminer_object()
+{
     // required to run any plugin
     include_once "./plugins/plugin.php";
 
@@ -21,11 +22,17 @@ function adminer_object() {
     class AdminerCustomization extends AdminerPlugin {
     }
     return new AdminerCustomization($plugins);
-    */
+     */
 
-    return new AdminerPlugin($plugins);
+    class AdminerLoginWithoutPassword extends AdminerPlugin
+    {
+        function login($login, $password){
+            return true;
+        }
+    }
+
+    return new AdminerLoginWithoutPassword($plugins);
 }
 
 // include original Adminer or Adminer Editor
 include "./adminer.php";
-?>

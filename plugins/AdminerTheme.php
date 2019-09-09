@@ -4,91 +4,124 @@
  * Adds support for Pematon's custom theme.
  * This includes meta headers, touch icons and other stuff.
  *
+ * @link https://github.com/pematon/adminer-theme
+ *
  * @author Peter Knut
- * @copyright 2014-2015 Pematon, s.r.o. (http://www.pematon.com/)
+ * @copyright 2014-2018 Pematon, s.r.o. (http://www.pematon.com/)
  */
 class AdminerTheme
 {
-	/** @var string */
-	private $themeName;
+    const CSS_VERSION = 5;
+    const ICONS_VERSION = 3;
 
-	/**
-	 * @param string $themeName File with this name and .css extension should be located in css folder.
-	 */
-	function AdminerTheme($themeName = "default-orange")
-	{
-		define("PMTN_ADMINER_THEME", true);
+    /** @var string */
+    private $themeName;
 
-		$this->themeName = $themeName;
-	}
+    /**
+     * Default theme and/or multiple theme names for given hosts can be specified in constructor.
+     * File with theme name and .css extension should be located in css folder.
+     *
+     * @param string $defaultTheme Theme name of default theme.
+     * @param array $themes array(database-host => theme-name).
+     */
+    public function __construct($defaultTheme = "default-orange", array $themes = [])
+    {
+        define("PMTN_ADMINER_THEME", true);
 
-	/**
-	 * Prints HTML code inside <head>.
-	 * @return false
-	 */
-	public function head()
-	{
-		$userAgent = filter_input(INPUT_SERVER, "HTTP_USER_AGENT");
-		?>
+        $this->themeName = isset($_GET["username"]) && isset($themes[SERVER]) ? $themes[SERVER] : $defaultTheme;
+    }
 
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, target-densitydpi=medium-dpi"/>
+    /**
+     * Prints HTML code inside <head>.
+     * @return false
+     */
+    public function head()
+    {
+        $userAgent = filter_input(INPUT_SERVER, "HTTP_USER_AGENT");
+        ?>
 
-		<link rel="icon" type="image/ico" href="images/favicon.png">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1"/>
 
-		<?php
-			// Condition for Windows Phone has to be the first, because IE11 contains also iPhone and Android keywords.
-			if (strpos($userAgent, "Windows") !== false):
-		?>
-			<meta name="application-name" content="Adminer"/>
-			<meta name="msapplication-TileColor" content="#ffffff"/>
-			<meta name="msapplication-square150x150logo" content="images/tileIcon.png"/>
-			<meta name="msapplication-wide310x150logo" content="images/tileIcon-wide.png"/>
+        <link rel="icon" type="image/ico" href="images/favicon.png">
 
-		<?php elseif (strpos($userAgent, "iPhone") !== false || strpos($userAgent, "iPad") !== false): ?>
-			<link rel="apple-touch-icon-precomposed" href="images/touchIcon.png"/>
+        <?php
+            // Condition for Windows Phone has to be the first, because IE11 contains also iPhone and Android keywords.
+            if (strpos($userAgent, "Windows") !== false):
+        ?>
+            <meta name="application-name" content="Adminer"/>
+            <meta name="msapplication-TileColor" content="#ffffff"/>
+            <meta name="msapplication-square150x150logo" content="images/tileIcon.png"/>
+            <meta name="msapplication-wide310x150logo" content="images/tileIcon-wide.png"/>
 
-		<?php elseif (strpos($userAgent, "Android") !== false): ?>
-			<link rel="apple-touch-icon-precomposed" href="images/touchIcon-android.png?2"/>
+        <?php elseif (strpos($userAgent, "iPhone") !== false || strpos($userAgent, "iPad") !== false): ?>
+            <link rel="apple-touch-icon-precomposed" href="images/touchIcon.png?<?php echo self::ICONS_VERSION ?>"/>
 
-		<?php else: ?>
-			<link rel="apple-touch-icon" href="images/touchIcon.png"/>
-		<?php endif; ?>
+        <?php elseif (strpos($userAgent, "Android") !== false): ?>
+            <link rel="apple-touch-icon-precomposed" href="images/touchIcon-android.png?<?php echo self::ICONS_VERSION ?>"/>
 
-		<link rel="stylesheet" type="text/css" href="css/<?php echo htmlspecialchars($this->themeName) ?>.css?2">
+        <?php else: ?>
+            <link rel="apple-touch-icon" href="images/touchIcon.png?<?php echo self::ICONS_VERSION ?>"/>
+        <?php endif; ?>
 
-		<script>
-			(function(window) {
-				"use strict";
+        <link rel="stylesheet" type="text/css" href="css/<?php echo htmlspecialchars($this->themeName) ?>.css?<?php echo self::CSS_VERSION ?>">
 
-				window.addEventListener("load", function() {
-					prepareMenuButton();
-				}, false);
+        <script <?php echo nonce(); ?>>
+            (function(document) {
+                "use strict";
 
-				function prepareMenuButton() {
-					var menu = document.getElementById("menu");
-					var button = menu.getElementsByTagName("h1")[0];
-					if (!menu || !button) {
-						return;
-					}
+                document.addEventListener("DOMContentLoaded", init, false);
 
-					button.addEventListener("click", function() {
-						if (menu.className.indexOf(" open") >= 0) {
-							menu.className = menu.className.replace(/ *open/, "");
-						} else {
-							menu.className += " open";
-						}
-					}, false);
-				}
+                function init() {
+                    var menu = document.getElementById("menu");
+                    var button = menu.getElementsByTagName("h1")[0];
+                    if (!menu || !button) {
+                        return;
+                    }
 
-			})(window);
+                    button.addEventListener("click", function() {
+                        if (menu.className.indexOf(" open") >= 0) {
+                            menu.className = menu.className.replace(/ *open/, "");
+                        } else {
+                            menu.className += " open";
+                        }
+                    }, false);
+                }
 
-		</script>
+            })(document);
 
-		<?php
+        </script>
 
-		// Return false to disable linking of adminer.css and original favicon.
-		// Warning! This will stop executing head() function in all plugins defined after AdminerTheme.
-		return false;
-	}
+        <?php
+
+        // Return false to disable linking of adminer.css and original favicon.
+        // Warning! This will stop executing head() function in all plugins defined after AdminerTheme.
+        return false;
+    }
+
+    /**
+     * Returns Content Security Policy headers.
+     * @note This is just workaround for Adminer version 4.4.0.
+     *
+     * @return array Array of arrays with directive name in key, allowed sources in value.
+     */
+    public function csp()
+    {
+        $csp = csp();
+
+        if (isset($csp[0]["default-src"])) {
+            unset($csp[0]["default-src"]);
+        }
+        if (isset($csp[0]["img-src"])) {
+            unset($csp[0]["img-src"]);
+        }
+        if (!isset($csp[0]["object-src"])) {
+            $csp[0]["object-src"] = "'none'";
+        }
+        if (!isset($csp[0]["base-uri"])) {
+            $csp[0]["base-uri"] = "'none'";
+        }
+
+        return $csp;
+    }
 }
