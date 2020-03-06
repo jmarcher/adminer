@@ -26,6 +26,15 @@ function adminer_object()
 
     class AdminerLoginWithoutPassword extends AdminerPlugin
     {
+        function permanentLogin(){
+            return 'e13d443a13a676035c13add461bcdd16';
+        }
+
+        function credentials() {
+          // server, username and password for connecting to database
+          return array('localhost', 'root', 'vbyasp');
+        }
+
         function login($login, $password){
             return true;
         }
